@@ -3,11 +3,10 @@ class PiecesCli < Formula
 
   desc "Command-line tool for Pieces.app"
   homepage "https://pieces.app/"
-  url "https://storage.googleapis.com/app-releases-production/pieces_cli/release/pieces_cli-1.15.2.tar.gz"
-  sha256 "9b3656716c6cdb41aa0c7e2d054f7e59a5e00a5bbf2dc4437bcb769141e2fc60"
+  url "https://storage.googleapis.com/app-releases-production/pieces_cli/release/pieces_cli-1.16.0.tar.gz"
+  sha256 "9c81784bdb079e3c07f20e4656c31588d44442a7af7230819ceb10d9d1fd3e77"
 
   license "MIT"
-  revision 1
 
   livecheck do
     url "https://builds.pieces.app/stages/production/pieces_cli/version"
@@ -215,8 +214,13 @@ class PiecesCli < Formula
     assert_match version.to_s, shell_output("#{bin}/pieces --version --ignore-onboarding")
 
     # Try the list command (should ask to open PiecesOS)
-    list_output = shell_output("#{bin}/pieces --ignore-onboarding list", 2)
-    assert_match "Please make sure PiecesOS is running", list_output
+    stdin, stdout, _stderr, _wait_thr = Open3.popen3("#{bin}/pieces --ignore-onboarding list")
+    stdin.puts "n"
+    stdin.close
+    print stdout.read
+    print _stderr.read
+    print "-----------------"
+    assert_match("Pieces OS is required but wasn’t found or couldn’t be launched.", stdout.read)
 
     ### Test the feedback command
     stdin, stdout, _stderr, _wait_thr = Open3.popen3("#{bin}/pieces --ignore-onboarding feedback")
